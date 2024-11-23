@@ -5,7 +5,7 @@ using BepInEx.Logging;
 namespace acidphantasm_stattrack
 {
     [BepInPlugin("phantasm.acid.stattrack", "acidphantasm-StatTrack", "1.0.0")]
-    [BepInDependency("com.SPT.core", "3.9.0")]
+    [BepInDependency("com.SPT.core", "3.10.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource;
