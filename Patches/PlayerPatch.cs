@@ -14,7 +14,7 @@ namespace acidphantasm_stattrack.Patches
         }
 
         [PatchPostfix]
-        private static void PatchPostfix(Player __instance, IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+        private static void PatchPostfix(Player __instance, IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
         {
             if (!aggressor.IsYourPlayer || lethalDamageType != EDamageType.Bullet) return;
 

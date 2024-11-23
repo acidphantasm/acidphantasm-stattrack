@@ -2,7 +2,7 @@
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
-using StatAttributeClass = GClass3030;
+using StatAttributeClass = GClass3103;
 using HarmonyLib;
 using static acidphantasm_stattrack.Utils.Utility;
 using acidphantasm_stattrack.Utils;
