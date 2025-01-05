@@ -115,6 +115,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>if not exist "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\" mkdir "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\"
+copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -19,9 +19,18 @@ namespace acidphantasm_stattrack.Patches
             if (!aggressor.IsYourPlayer || lethalDamageType != EDamageType.Bullet) return;
 
             var weapon = damageInfo.Weapon.Id;
-                
-            if (bodyPart == EBodyPart.Head) JsonFileUtils.TemporaryAddData(weapon, true);
-            else JsonFileUtils.TemporaryAddData(weapon);
+            var weaponTpl = damageInfo.Weapon.TemplateId;
+
+            if (bodyPart == EBodyPart.Head)
+            {
+                JsonFileUtils.TemporaryAddData(weapon, true, false);
+                JsonFileUtils.TemporaryAddData(weaponTpl, true, false);
+            }
+            else
+            {
+                JsonFileUtils.TemporaryAddData(weapon, false, false);
+                JsonFileUtils.TemporaryAddData(weaponTpl, false, false);
+            }
         }
     }
 }
