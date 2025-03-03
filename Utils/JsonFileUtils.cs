@@ -1,49 +1,33 @@
-﻿using Comfort.Common;
-using EFT;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using static acidphantasm_stattrack.Utils.Utility;
 
 namespace acidphantasm_stattrack.Utils
 {
     public static class JsonFileUtils
     {
+        public static Dictionary<string, Dictionary<string, int[]>> Stats { get; set; } = null;
+        // Put into Stats variable, since mod keeps polling /stattrack/load
         public static Dictionary<string, int[]> WeaponInfoForRaid { get; set; } = [];
-
-        private static string directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
 
         private static readonly JsonSerializerSettings _options
             = new() { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
 
-        private static void StreamWrite(object weaponData, string path)
-        {
-            using var streamWriter = File.CreateText(path);
-            using var jsonWriter = new JsonTextWriter(streamWriter);
-            JsonSerializer.CreateDefault(_options).Serialize(jsonWriter, weaponData);
-            jsonWriter.Close();
-            streamWriter.Close();
-        }
         public static void EndRaidWriteData(string profileID)
         {
-            var path = Path.Combine(directory, profileID + ".json");
-
-            if (!File.Exists(path))
+            if (!Stats.ContainsKey(profileID))
             {
-                StreamWrite(WeaponInfoForRaid, path);
+                Stats[profileID] = WeaponInfoForRaid;
+                SaveData();
                 WeaponInfoForRaid.Clear();
                 return;
             }
+            Dictionary<string, int[]> newDictionary = MergeDictionary(Stats[profileID], WeaponInfoForRaid);
+            Stats[profileID] = newDictionary; // oldDictionary contains other profiles, update profileID key to new dictionary instead - need to load again since Stats updated
 
-            var oldData = File.ReadAllText(path);
-            var oldDictionary = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(oldData);
-
-            Dictionary<string, int[]> newDictionary = MergeDictionary(oldDictionary, WeaponInfoForRaid);
-
-            StreamWrite(newDictionary, path);
+            SaveData();
             WeaponInfoForRaid.Clear();
         }
 
@@ -94,15 +78,12 @@ namespace acidphantasm_stattrack.Utils
         public static string GetData(string weaponID, EStatTrackAttributeId attributeType, bool tooltip = false)
         {
             var profileID = Globals.GetPlayerProfile().ProfileId;
-            var path = Path.Combine(directory, profileID + ".json");
-
-            if (!File.Exists(path)) return "-";
-
-            var jsonData = File.ReadAllText(path);
-            var jsonDictionary = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(jsonData);
-            if (!jsonDictionary.ContainsKey(weaponID)) return "-";
-
-            if (jsonDictionary[weaponID].Length == 3)
+            if (Stats == null) {
+                LoadData();
+            }
+            if (!Stats.ContainsKey(profileID)) return "-";
+            if (!Stats[profileID].ContainsKey(weaponID)) return "-";
+            if (Stats[profileID][weaponID].Length == 3)
             {
                 string flavourText = "";
                 switch (attributeType)
@@ -112,35 +93,61 @@ namespace acidphantasm_stattrack.Utils
                         {
                             flavourText = " kills with all " + Globals.GetItemLocalizedName(weaponID);
                         }
-                        string killCount = jsonDictionary[weaponID][0].ToString();
+                        string killCount = Stats[profileID][weaponID][0].ToString();
                         return killCount + flavourText;
                     case EStatTrackAttributeId.Headshots:
                         if (tooltip)
                         {
                             flavourText = " headshot percent with all " + Globals.GetItemLocalizedName(weaponID);
                         }
-                        string headshotPercent = (jsonDictionary[weaponID][1] / (double)jsonDictionary[weaponID][0]).ToString("P1");
+                        string headshotPercent = (Stats[profileID][weaponID][1] / (double)Stats[profileID][weaponID][0]).ToString("P1");
                         return headshotPercent + flavourText;
                     case EStatTrackAttributeId.ShotsPerKillAverage:
                         if (tooltip)
                         {
                             flavourText = " rounds to kill average with all " + Globals.GetItemLocalizedName(weaponID);
                         }
-                        string shotsPerKill = Math.Round(jsonDictionary[weaponID][2] / (double)jsonDictionary[weaponID][0], 2).ToString();
+                        string shotsPerKill = Math.Round(Stats[profileID][weaponID][2] / (double)Stats[profileID][weaponID][0], 2).ToString();
                         return shotsPerKill + flavourText;
                     case EStatTrackAttributeId.Shots:
                         if (tooltip)
                         {
                             flavourText = " rounds fired with all " + Globals.GetItemLocalizedName(weaponID);
                         }
-                        string shotsCount = jsonDictionary[weaponID][2].ToString();
+                        string shotsCount = Stats[profileID][weaponID][2].ToString();
                         return shotsCount + flavourText;
                     default:
                         return "-";
                 }
             }
-
             return "-";
+        }
+
+        public static void LoadData()
+        {
+            try
+            {
+                string payload = RequestHandler.GetJson("/stattrack/load");
+                Stats = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, int[]>>>(payload);
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError("Failed to load: " + ex.ToString());
+                NotificationManagerClass.DisplayWarningNotification("Failed to load Weapon StatTrack File - check the server");
+            }
+        }
+
+        public static void SaveData()
+        {
+            try
+            {
+                RequestHandler.PutJson("/stattrack/save", JsonConvert.SerializeObject(Stats));
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError("Failed to save: " + ex.ToString());
+                NotificationManagerClass.DisplayWarningNotification("Failed to save weapon customization - check the server");
+            }
         }
     }
 }
