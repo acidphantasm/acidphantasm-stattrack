@@ -33,6 +33,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Globals\Globals.cs" />
+    <Compile Include="Patches\GameWorldPatch.cs" />
+    <Compile Include="Patches\PlayerPatch.cs" />
+    <Compile Include="Patches\WeaponPatch.cs" />
+    <Compile Include="Utils\JsonFileUtils.cs" />
+    <Compile Include="Utils\Utility.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
   <PropertyGroup>
     <TarkovDir Condition=" '$(TarkovDir)' == '' ">D:\SPT 3.11 DEV\</TarkovDir>
     <TarkovPluginsSPTDir>$(TarkovDir)BepInEx\plugins\spt\</TarkovPluginsSPTDir>
