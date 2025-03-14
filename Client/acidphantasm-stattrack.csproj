@@ -33,36 +33,42 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <TarkovDir Condition=" '$(TarkovDir)' == '' ">D:\SPT 3.11 DEV\</TarkovDir>
+    <TarkovPluginsSPTDir>$(TarkovDir)BepInEx\plugins\spt\</TarkovPluginsSPTDir>
+    <TarkovManagedDir>$(TarkovDir)EscapeFromTarkov_Data\Managed\</TarkovManagedDir>
+    <TarkovBepInExCoreDir>$(TarkovDir)BepInEx\core\</TarkovBepInExCoreDir>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>$(TarkovBepInExCoreDir)0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Spt.Common">
-      <HintPath>..\..\BepInEx\plugins\spt\spt-common.dll</HintPath>
+      <HintPath>$(TarkovPluginsSPTDir)spt-common.dll</HintPath>
     </Reference>
     <Reference Include="Spt.Reflection">
-      <HintPath>..\..\BepInEx\plugins\spt\spt-reflection.dll</HintPath>
+      <HintPath>$(TarkovPluginsSPTDir)spt-reflection.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\..\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>$(TarkovBepInExCoreDir)BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="Comfort">
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Comfort.dll</HintPath>
     </Reference>
     <Reference Include="Comfort.Unity, Version=1.0.0.4, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Sirenix.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -74,48 +80,49 @@
     <Reference Include="System.Xml" />
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>$(TarkovManagedDir)EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Globals\Globals.cs" />
-    <Compile Include="Patches\GameWorldPatch.cs" />
-    <Compile Include="Patches\PlayerPatch.cs" />
-    <Compile Include="Patches\WeaponPatch.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\JsonFileUtils.cs" />
-    <Compile Include="Utils\Utility.cs" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if not exist "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\" mkdir "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\"
-copy "$(TargetPath)" "$(ProjectDir)\..\..\BepInEx\plugins\acidphantasm-stattrack\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <OutputDLL Include="$(ProjectDir)$(OutDir)$(TargetName).dll" />
+      <License Include="$(ProjectDir)LICENSE" />
+    </ItemGroup>
+    <!-- Copies the output and resources to tarkov game folder -->
+    <Copy SourceFiles="@(OutputDLL);@(License)" DestinationFolder="$(TarkovDir)BepInEx\plugins\acidphantasm-stattrack\%(RecursiveDir)" />
+    <!-- Creates a release zip file -->
+    <RemoveDir Directories="$(ProjectDir)release" />
+    <Copy SourceFiles="@(OutputDLL);@(License)" DestinationFolder="$(ProjectDir)release\acidphantasm-stattrack\BepInEx\plugins\acidphantasm-stattrack\%(RecursiveDir)" />
+    <ZipDirectory SourceDirectory="$(ProjectDir)release\acidphantasm-stattrack\" DestinationFile="$(ProjectDir)release\acidphantasm-stattrack.zip" />
+  </Target>
 </Project>
