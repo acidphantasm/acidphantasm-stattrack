@@ -16,7 +16,7 @@ namespace acidphantasm_stattrack.Patches
         [PatchPostfix]
         private static void PatchPostfix(IPlayer iPlayer)
         {
-            if (iPlayer.IsYourPlayer) JsonFileUtils.EndRaidWriteData(iPlayer.ProfileId);
+            if (iPlayer.IsYourPlayer) JsonFileUtils.EndRaidMergeData();
         }
     }
 }

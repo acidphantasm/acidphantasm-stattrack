@@ -2,7 +2,7 @@
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
-using StatAttributeClass = GClass3103;
+using StatAttributeClass = GClass3174;
 using HarmonyLib;
 using static acidphantasm_stattrack.Utils.Utility;
 using acidphantasm_stattrack.Utils;
@@ -61,7 +61,7 @@ namespace acidphantasm_stattrack.Patches
         }
 
         [PatchPostfix]
-        private static void PatchPostfix(Weapon __instance, float ammoBurnRatio, float ammoHeatFactor, float skillWeaponTreatmentFactor, BackendConfigSettingsClass.GClass1522 overheatSettings, float pastTime)
+        private static void PatchPostfix(Weapon __instance, float ammoBurnRatio, float ammoHeatFactor, float skillWeaponTreatmentFactor, BackendConfigSettingsClass.GClass1502 overheatSettings, float pastTime)
         {
             if (__instance.Owner.ID == Globals.GetPlayerProfile().ProfileId)
             {

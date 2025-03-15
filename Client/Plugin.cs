@@ -4,8 +4,7 @@ using BepInEx.Logging;
 
 namespace acidphantasm_stattrack
 {
-    [BepInPlugin("phantasm.acid.stattrack", "acidphantasm-StatTrack", "1.1.0")]
-    [BepInDependency("com.SPT.core", "3.10.0")]
+    [BepInPlugin("com.acidphantasm.stattrack", "acidphantasm-StatTrack", "1.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource;
@@ -20,6 +19,8 @@ namespace acidphantasm_stattrack
             new WeaponOnShotPatch().Enable();
             new PlayerPatch().Enable();
             new GameWorldPatch().Enable();
+            new MenuLoadPatch().Enable();
+            new InsurancePatch().Enable();
 
             LogSource.LogInfo("[StatTrack] loaded!");
         }

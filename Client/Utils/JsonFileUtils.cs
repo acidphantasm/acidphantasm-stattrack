@@ -1,146 +1,176 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.UI;
 using Newtonsoft.Json;
+using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using UnityEngine.Profiling;
 using static acidphantasm_stattrack.Utils.Utility;
 
 namespace acidphantasm_stattrack.Utils
 {
     public static class JsonFileUtils
     {
-        public static Dictionary<string, int[]> WeaponInfoForRaid { get; set; } = [];
+        public static Dictionary<string, Dictionary<string, CustomizedObject>> WeaponInfoOutOfRaid { get; set; } = [];
+        public static Dictionary<string, CustomizedObject> WeaponInfoForRaid { get; set; } = [];
 
-        private static string directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-
-        private static readonly JsonSerializerSettings _options
-            = new() { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-
-        private static void StreamWrite(object weaponData, string path)
+        public static Dictionary<string, CustomizedObject> MergeDictionary(Dictionary<string, CustomizedObject> primaryDictionary, Dictionary<string, CustomizedObject> inRaidDictionary)
         {
-            using var streamWriter = File.CreateText(path);
-            using var jsonWriter = new JsonTextWriter(streamWriter);
-            JsonSerializer.CreateDefault(_options).Serialize(jsonWriter, weaponData);
-            jsonWriter.Close();
-            streamWriter.Close();
-        }
-        public static void EndRaidWriteData(string profileID)
-        {
-            var path = Path.Combine(directory, profileID + ".json");
-
-            if (!File.Exists(path))
-            {
-                StreamWrite(WeaponInfoForRaid, path);
-                WeaponInfoForRaid.Clear();
-                return;
-            }
-
-            var oldData = File.ReadAllText(path);
-            var oldDictionary = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(oldData);
-
-            Dictionary<string, int[]> newDictionary = MergeDictionary(oldDictionary, WeaponInfoForRaid);
-
-            StreamWrite(newDictionary, path);
-            WeaponInfoForRaid.Clear();
-        }
-
-        public static Dictionary<string, int[]> MergeDictionary(Dictionary<string, int[]> ogDictionary, Dictionary<string, int[]> temporaryDictionary)
-        {
-            var mergedDictionary = new Dictionary<string, int[]>();
-            foreach (var kvp in temporaryDictionary)
-            {
-                if (!mergedDictionary.ContainsKey(kvp.Key)) mergedDictionary[kvp.Key] = kvp.Value;
-                else mergedDictionary[kvp.Key] = [kvp.Value[0] + mergedDictionary[kvp.Key][0], kvp.Value[1] + mergedDictionary[kvp.Key][1], kvp.Value[2] + mergedDictionary[kvp.Key][2]];
-            }
-            foreach (var kvp in ogDictionary)
+            var mergedDictionary = new Dictionary<string, CustomizedObject>();
+            foreach (var kvp in inRaidDictionary)
             {
                 if (!mergedDictionary.ContainsKey(kvp.Key)) mergedDictionary[kvp.Key] = kvp.Value;
                 else
                 {
-                    if (ogDictionary[kvp.Key].Length != 3) mergedDictionary[kvp.Key] = [kvp.Value[0] + mergedDictionary[kvp.Key][0], kvp.Value[1] + mergedDictionary[kvp.Key][1], mergedDictionary[kvp.Key][2]];
-                    else mergedDictionary[kvp.Key] = [kvp.Value[0] + mergedDictionary[kvp.Key][0], kvp.Value[1] + mergedDictionary[kvp.Key][1], kvp.Value[2] + mergedDictionary[kvp.Key][2]];
+                    mergedDictionary[kvp.Key].kills += inRaidDictionary[kvp.Key].kills;
+                    mergedDictionary[kvp.Key].headshots += inRaidDictionary[kvp.Key].headshots;
+                    mergedDictionary[kvp.Key].totalShots += inRaidDictionary[kvp.Key].totalShots;
+                }
+            }
+            foreach (var kvp in primaryDictionary)
+            {
+                if (!mergedDictionary.ContainsKey(kvp.Key)) mergedDictionary[kvp.Key] = kvp.Value;
+                else
+                {
+                    mergedDictionary[kvp.Key].kills += primaryDictionary[kvp.Key].kills;
+                    mergedDictionary[kvp.Key].headshots += primaryDictionary[kvp.Key].headshots;
+                    mergedDictionary[kvp.Key].totalShots += primaryDictionary[kvp.Key].totalShots;
                 }
             }
             return mergedDictionary;
         }
         public static void TemporaryAddData(string weaponID, bool headshot = false, bool shot = false)
         {
-            int[] values;
+            var profileID = Globals.GetPlayerProfile().ProfileId;
+            CustomizedObject values = new CustomizedObject();
             if (shot)
             {
-                values = [0, 0, 1];
+                values.kills = 0;
+                values.headshots = 0;
+                values.totalShots = 1;
             }
             else if (headshot)
             {
-                values = [1, 1, 0];
+                values.kills = 1;
+                values.headshots = 1;
+                values.totalShots = 0;
             }
             else if (!shot && !headshot)
             {
-                values = [1, 0, 0];
+                values.kills = 1;
+                values.headshots = 0;
+                values.totalShots = 0;
             }
             else
             {
-                values = [0, 0, 0];
-                Plugin.LogSource.LogInfo("Something went wrong adding data.. adding [0, 0, 0]");
+                values.kills = 0;
+                values.headshots = 0;
+                values.totalShots = 0;
+                Plugin.LogSource.LogInfo("Something went wrong adding data..");
             }
 
             if (!WeaponInfoForRaid.ContainsKey(weaponID)) WeaponInfoForRaid.Add(weaponID, values);
-            else WeaponInfoForRaid[weaponID] = [WeaponInfoForRaid[weaponID][0] + values[0], WeaponInfoForRaid[weaponID][1] + values[1], WeaponInfoForRaid[weaponID][2] + values[2]];
+            else
+            {
+                WeaponInfoForRaid[weaponID].kills += values.kills;
+                WeaponInfoForRaid[weaponID].headshots += values.headshots;
+                WeaponInfoForRaid[weaponID].totalShots += values.totalShots;
+            }
+
         }
 
         public static string GetData(string weaponID, EStatTrackAttributeId attributeType, bool tooltip = false)
         {
             var profileID = Globals.GetPlayerProfile().ProfileId;
-            var path = Path.Combine(directory, profileID + ".json");
-
-            if (!File.Exists(path)) return "-";
-
-            var jsonData = File.ReadAllText(path);
-            var jsonDictionary = JsonConvert.DeserializeObject<Dictionary<string, int[]>>(jsonData);
-            if (!jsonDictionary.ContainsKey(weaponID)) return "-";
-
-            if (jsonDictionary[weaponID].Length == 3)
+            if (WeaponInfoOutOfRaid == null)
             {
-                string flavourText = "";
-                switch (attributeType)
-                {
-                    case EStatTrackAttributeId.Kills:
-                        if (tooltip)
-                        {
-                            flavourText = " kills with all " + Globals.GetItemLocalizedName(weaponID);
-                        }
-                        string killCount = jsonDictionary[weaponID][0].ToString();
-                        return killCount + flavourText;
-                    case EStatTrackAttributeId.Headshots:
-                        if (tooltip)
-                        {
-                            flavourText = " headshot percent with all " + Globals.GetItemLocalizedName(weaponID);
-                        }
-                        string headshotPercent = (jsonDictionary[weaponID][1] / (double)jsonDictionary[weaponID][0]).ToString("P1");
-                        return headshotPercent + flavourText;
-                    case EStatTrackAttributeId.ShotsPerKillAverage:
-                        if (tooltip)
-                        {
-                            flavourText = " rounds to kill average with all " + Globals.GetItemLocalizedName(weaponID);
-                        }
-                        string shotsPerKill = Math.Round(jsonDictionary[weaponID][2] / (double)jsonDictionary[weaponID][0], 2).ToString();
-                        return shotsPerKill + flavourText;
-                    case EStatTrackAttributeId.Shots:
-                        if (tooltip)
-                        {
-                            flavourText = " rounds fired with all " + Globals.GetItemLocalizedName(weaponID);
-                        }
-                        string shotsCount = jsonDictionary[weaponID][2].ToString();
-                        return shotsCount + flavourText;
-                    default:
-                        return "-";
-                }
+                LoadFromServer();
             }
+            if (!WeaponInfoOutOfRaid.ContainsKey(profileID)) return "-";
+            if (!WeaponInfoOutOfRaid[profileID].ContainsKey(weaponID)) return "-";
 
-            return "-";
+            string flavourText = "";
+            switch (attributeType)
+            {
+                case EStatTrackAttributeId.Kills:
+                    if (tooltip)
+                    {
+                        flavourText = " kills with all " + Globals.GetItemLocalizedName(weaponID);
+                    }
+                    string killCount = WeaponInfoOutOfRaid[profileID][weaponID].kills.ToString();
+                    return killCount + flavourText;
+                case EStatTrackAttributeId.Headshots:
+                    if (tooltip)
+                    {
+                        flavourText = " headshot percent with all " + Globals.GetItemLocalizedName(weaponID);
+                    }
+                    string headshotPercent = (WeaponInfoOutOfRaid[profileID][weaponID].headshots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills).ToString("P1");
+                    return headshotPercent + flavourText;
+                case EStatTrackAttributeId.ShotsPerKillAverage:
+                    if (tooltip)
+                    {
+                        flavourText = " rounds to kill average with all " + Globals.GetItemLocalizedName(weaponID);
+                    }
+                    string shotsPerKill = Math.Round(WeaponInfoOutOfRaid[profileID][weaponID].totalShots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills, 2).ToString();
+                    return shotsPerKill + flavourText;
+                case EStatTrackAttributeId.Shots:
+                    if (tooltip)
+                    {
+                        flavourText = " rounds fired with all " + Globals.GetItemLocalizedName(weaponID);
+                    }
+                    string shotsCount = WeaponInfoOutOfRaid[profileID][weaponID].totalShots.ToString();
+                    return shotsCount + flavourText;
+                default:
+                    return "-";
+            }
+        }
+
+        public static void EndRaidMergeData()
+        {
+            var profileID = Globals.GetPlayerProfile().ProfileId;
+            Dictionary<string, CustomizedObject> newDictionary = MergeDictionary(WeaponInfoOutOfRaid[profileID], WeaponInfoForRaid);
+            WeaponInfoOutOfRaid[profileID] = newDictionary;
+            SaveRaidEndInServer();
+        }
+
+        public static void SaveRaidEndInServer()
+        {
+            try
+            {
+                RequestHandler.PutJson("/stattrack/save", JsonConvert.SerializeObject(WeaponInfoOutOfRaid));
+                WeaponInfoForRaid.Clear();
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError("Failed to save: " + ex.ToString());
+                NotificationManagerClass.DisplayWarningNotification("Failed to save weapon customization - check the server");
+            }
+        }
+
+        public static void LoadFromServer()
+        {
+            try
+            {
+                string payload = RequestHandler.GetJson("/stattrack/load");
+                WeaponInfoOutOfRaid = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CustomizedObject>>>(payload);
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogSource.LogError("Failed to load: " + ex.ToString());
+                NotificationManagerClass.DisplayWarningNotification("Failed to load Weapon StatTrack File - check the server");
+            }
+        }
+
+        public class CustomizedObject
+        {
+            public int kills;
+            public int headshots;
+            public int totalShots;
         }
     }
 }
