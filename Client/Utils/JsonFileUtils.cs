@@ -133,8 +133,15 @@ namespace acidphantasm_stattrack.Utils
         public static void EndRaidMergeData()
         {
             var profileID = Globals.GetPlayerProfile().ProfileId;
-            Dictionary<string, CustomizedObject> newDictionary = MergeDictionary(WeaponInfoOutOfRaid[profileID], WeaponInfoForRaid);
-            WeaponInfoOutOfRaid[profileID] = newDictionary;
+            if (WeaponInfoOutOfRaid.ContainsKey(profileID))
+            {
+                Dictionary<string, CustomizedObject> newDictionary = MergeDictionary(WeaponInfoOutOfRaid[profileID], WeaponInfoForRaid);
+                WeaponInfoOutOfRaid[profileID] = newDictionary;
+            }
+            else
+            {
+                WeaponInfoOutOfRaid[profileID] = WeaponInfoForRaid;
+            }
             SaveRaidEndInServer();
         }
 
