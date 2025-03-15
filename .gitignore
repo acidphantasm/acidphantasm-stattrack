@@ -368,5 +368,5 @@ FodyWeavers.xsd
 /Server/.eslintrc.json
 /Server/package-lock.json
 /Server/types/*
-/Server/dist/*
+Server/dist/*
 Server/dist/acidphantasm-stattrack.zip
