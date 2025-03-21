@@ -131,9 +131,9 @@ class StatTrack implements IPreSptLoadMod
     {
         try 
         {
+            await this.writeBackup();
             const filename = path.join(__dirname, "../weaponStats.json");
             await this.fileSystem.writeJson(filename, this.weaponStats, 2);
-            await this.writeBackup();
         }
         catch (error) 
         {
