@@ -159,7 +159,7 @@ namespace acidphantasm_stattrack.Utils
             catch (Exception ex)
             {
                 Plugin.LogSource.LogError("Failed to save: " + ex.ToString());
-                NotificationManagerClass.DisplayWarningNotification("Failed to save weapon customization - check the server");
+                NotificationManagerClass.DisplayWarningNotification("Failed to save Weapon StatTrack File - check the server");
             }
         }
 
