@@ -55,24 +55,28 @@ namespace acidphantasm_stattrack.Utils
                 values.kills = 0;
                 values.headshots = 0;
                 values.totalShots = 1;
+                values.timesLost = 0;
             }
             else if (headshot)
             {
                 values.kills = 1;
                 values.headshots = 1;
                 values.totalShots = 0;
+                values.timesLost = 0;
             }
             else if (!shot && !headshot)
             {
                 values.kills = 1;
                 values.headshots = 0;
                 values.totalShots = 0;
+                values.timesLost = 0;
             }
             else
             {
                 values.kills = 0;
                 values.headshots = 0;
                 values.totalShots = 0;
+                values.timesLost = 0;
                 Plugin.LogSource.LogInfo("Something went wrong adding data..");
             }
 
@@ -82,6 +86,7 @@ namespace acidphantasm_stattrack.Utils
                 WeaponInfoForRaid[weaponID].kills += values.kills;
                 WeaponInfoForRaid[weaponID].headshots += values.headshots;
                 WeaponInfoForRaid[weaponID].totalShots += values.totalShots;
+                WeaponInfoForRaid[weaponID].timesLost += values.timesLost;
             }
 
         }
