@@ -32,7 +32,6 @@ namespace acidphantasm_stattrack.Patches
             hsTrack.Name = EStatTrackAttributeId.Headshots.GetName();
             hsTrack.Base = () => 1f;
             hsTrack.StringValue = () => JsonFileUtils.GetData(id, EStatTrackAttributeId.Headshots);
-            hsTrack.Tooltip = () => JsonFileUtils.GetData(__instance.TemplateId, EStatTrackAttributeId.Headshots, true);
             hsTrack.DisplayType = () => EItemAttributeDisplayType.Compact;
             SafelyAddAttributeToList(hsTrack, __instance);
 
@@ -40,7 +39,6 @@ namespace acidphantasm_stattrack.Patches
             shotPerKillTrack.Name = EStatTrackAttributeId.ShotsPerKillAverage.GetName();
             shotPerKillTrack.Base = () => 1f;
             shotPerKillTrack.StringValue = () => JsonFileUtils.GetData(id, EStatTrackAttributeId.ShotsPerKillAverage);
-            shotPerKillTrack.Tooltip = () => JsonFileUtils.GetData(__instance.TemplateId, EStatTrackAttributeId.ShotsPerKillAverage, true);
             shotPerKillTrack.DisplayType = () => EItemAttributeDisplayType.Compact;
             SafelyAddAttributeToList(shotPerKillTrack, __instance);
 
@@ -48,7 +46,6 @@ namespace acidphantasm_stattrack.Patches
             shotTrack.Name = EStatTrackAttributeId.Shots.GetName();
             shotTrack.Base = () => 1f;
             shotTrack.StringValue = () => JsonFileUtils.GetData(id, EStatTrackAttributeId.Shots);
-            shotTrack.Tooltip = () => JsonFileUtils.GetData(__instance.TemplateId, EStatTrackAttributeId.Shots, true);
             shotTrack.DisplayType = () => EItemAttributeDisplayType.Compact;
             SafelyAddAttributeToList(shotTrack, __instance);
         }

@@ -28,6 +28,8 @@ class StatTrack implements IPreSptLoadMod
         const staticRouterModService = container.resolve<StaticRouterModService>("StaticRouterModService");
         const cloner = container.resolve<ICloner>("RecursiveCloner");
 
+        this.load();
+
         staticRouterModService.registerStaticRouter(
             "StatTrack-GameStartRouter",
             [
@@ -40,7 +42,7 @@ class StatTrack implements IPreSptLoadMod
                     }
                 }
             ],
-            "APBS"
+            "StatTrack"
         );
 
         staticRouterModService.registerStaticRouter(
@@ -55,7 +57,7 @@ class StatTrack implements IPreSptLoadMod
                     action: async (url, info, sessionId, output) => JSON.stringify(this.weaponStats)
                 }
             ],
-            "custom-static-stat-track"
+            "StatTrack"
         );
 
         // listen to ItemHelper.replaceIDs to keep in sync
@@ -85,7 +87,10 @@ class StatTrack implements IPreSptLoadMod
                             if (oldId in this.weaponStats[profileId]) 
                             {
                                 const newId = results[i]._id;
+                                const weaponTpl = results[i]._tpl;
                                 this.weaponStats[profileId][newId] = cloner.clone(this.weaponStats[profileId][oldId]);
+                                this.weaponStats[profileId][newId].timesLost++;
+                                this.weaponStats[profileId][weaponTpl].timesLost++;
 
                                 dirty = true;
                                 this.logger.debug(`[StatTrack] Weapon ${oldId} is now ${newId}, stats copied`);
@@ -128,10 +133,25 @@ class StatTrack implements IPreSptLoadMod
         {
             const filename = path.join(__dirname, "../weaponStats.json");
             await this.fileSystem.writeJson(filename, this.weaponStats, 2);
+            await this.writeBackup();
         }
         catch (error) 
         {
             this.logger.error("StatTrack: Failed to save weapon stats! " + error);
+        }
+    }
+
+    private async writeBackup() 
+    {
+        try 
+        {
+            const filename = path.join(__dirname, "../weaponStats.json");
+            const backupname = path.join(__dirname, "../weaponStats.json.bak");
+            await this.fileSystem.copy(filename, backupname);
+        }
+        catch (error) 
+        {
+            this.logger.error("StatTrack: Failed to backup weapon stats! " + error);
         }
     }
 
@@ -141,6 +161,13 @@ class StatTrack implements IPreSptLoadMod
         if (this.fileSystem.exists(filename)) 
         {
             const jsonData = this.fileSystem.readJson(filename);
+            for (const profileId of Object.keys(jsonData))
+            {
+                for (const weaponID of Object.keys(jsonData[profileId])) 
+                {
+                    if (jsonData[profileId][weaponID].timesLost == undefined) jsonData[profileId][weaponID].timesLost = 0;
+                }
+            }
             this.weaponStats = jsonData;
         }
         else 
@@ -152,9 +179,10 @@ class StatTrack implements IPreSptLoadMod
 }
 
 type CustomizedObject = {
-    kills: number;
-    headshots: number;
-    totalShots: number;
+    kills: number,
+    headshots: number,
+    totalShots: number,
+    timesLost: number,
 };
 
 type WeaponStats = Record<string, Record<string, CustomizedObject>>;

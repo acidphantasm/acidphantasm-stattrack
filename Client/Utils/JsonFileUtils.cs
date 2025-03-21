@@ -30,6 +30,7 @@ namespace acidphantasm_stattrack.Utils
                     mergedDictionary[kvp.Key].kills += inRaidDictionary[kvp.Key].kills;
                     mergedDictionary[kvp.Key].headshots += inRaidDictionary[kvp.Key].headshots;
                     mergedDictionary[kvp.Key].totalShots += inRaidDictionary[kvp.Key].totalShots;
+                    mergedDictionary[kvp.Key].timesLost += inRaidDictionary[kvp.Key].timesLost;
                 }
             }
             foreach (var kvp in primaryDictionary)
@@ -40,6 +41,7 @@ namespace acidphantasm_stattrack.Utils
                     mergedDictionary[kvp.Key].kills += primaryDictionary[kvp.Key].kills;
                     mergedDictionary[kvp.Key].headshots += primaryDictionary[kvp.Key].headshots;
                     mergedDictionary[kvp.Key].totalShots += primaryDictionary[kvp.Key].totalShots;
+                    mergedDictionary[kvp.Key].timesLost += primaryDictionary[kvp.Key].timesLost;
                 }
             }
             return mergedDictionary;
@@ -94,37 +96,34 @@ namespace acidphantasm_stattrack.Utils
             if (!WeaponInfoOutOfRaid.ContainsKey(profileID)) return "-";
             if (!WeaponInfoOutOfRaid[profileID].ContainsKey(weaponID)) return "-";
 
-            string flavourText = "";
+            int killCount = WeaponInfoOutOfRaid[profileID][weaponID].kills;
+            int insuranceCount = WeaponInfoOutOfRaid[profileID][weaponID].timesLost;
+            string killDeathRatio = insuranceCount > 0 ? Math.Round(killCount / (double)insuranceCount, 2).ToString() : "∞";
+            string headshotPercent = Math.Round((WeaponInfoOutOfRaid[profileID][weaponID].headshots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills)*100, 1).ToString();
+            string shotCount = WeaponInfoOutOfRaid[profileID][weaponID].totalShots.ToString();
+            string shotsToKillAverage = Math.Round(WeaponInfoOutOfRaid[profileID][weaponID].totalShots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills, 2).ToString();
+
+            if (tooltip)
+            {
+                return
+                    $"All -{Globals.GetItemLocalizedName(weaponID)}- Stats" +
+                    $"\n {killCount.ToString()} Kills" +
+                    $"\n {killDeathRatio} Kill/Death Ratio" +
+                    $"\n {headshotPercent} Headshot Kill %" +
+                    $"\n {shotsToKillAverage} Rounds-To-Kill Average" +
+                    $"\n {shotCount} Shots";
+            }
             switch (attributeType)
             {
                 case EStatTrackAttributeId.Kills:
-                    if (tooltip)
-                    {
-                        flavourText = " kills with all " + Globals.GetItemLocalizedName(weaponID);
-                    }
-                    string killCount = WeaponInfoOutOfRaid[profileID][weaponID].kills.ToString();
-                    return killCount + flavourText;
+                    var stringToReturn = insuranceCount > 1 ? $"{killCount.ToString()} K | {killDeathRatio} KD" : $"{killCount.ToString()} K | ∞ KD";
+                    return stringToReturn;
                 case EStatTrackAttributeId.Headshots:
-                    if (tooltip)
-                    {
-                        flavourText = " headshot percent with all " + Globals.GetItemLocalizedName(weaponID);
-                    }
-                    string headshotPercent = (WeaponInfoOutOfRaid[profileID][weaponID].headshots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills).ToString("P1");
-                    return headshotPercent + flavourText;
+                    return headshotPercent;
                 case EStatTrackAttributeId.ShotsPerKillAverage:
-                    if (tooltip)
-                    {
-                        flavourText = " rounds to kill average with all " + Globals.GetItemLocalizedName(weaponID);
-                    }
-                    string shotsPerKill = Math.Round(WeaponInfoOutOfRaid[profileID][weaponID].totalShots / (double)WeaponInfoOutOfRaid[profileID][weaponID].kills, 2).ToString();
-                    return shotsPerKill + flavourText;
+                    return shotsToKillAverage;
                 case EStatTrackAttributeId.Shots:
-                    if (tooltip)
-                    {
-                        flavourText = " rounds fired with all " + Globals.GetItemLocalizedName(weaponID);
-                    }
-                    string shotsCount = WeaponInfoOutOfRaid[profileID][weaponID].totalShots.ToString();
-                    return shotsCount + flavourText;
+                    return shotCount;
                 default:
                     return "-";
             }
@@ -163,7 +162,7 @@ namespace acidphantasm_stattrack.Utils
         {
             try
             {
-                string payload = RequestHandler.GetJson("/stattrack/load");
+                string payload = RequestHandler.GetJson("/stattrack/load"); 
                 WeaponInfoOutOfRaid = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, CustomizedObject>>>(payload);
             }
             catch (Exception ex)
@@ -178,6 +177,7 @@ namespace acidphantasm_stattrack.Utils
             public int kills;
             public int headshots;
             public int totalShots;
+            public int timesLost;
         }
     }
 }

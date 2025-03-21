@@ -9,7 +9,7 @@ namespace acidphantasm_stattrack.Utils
             Kills = 23,
             Headshots = 43,
             ShotsPerKillAverage = 8,
-            Shots = 48,
+            Shots = 48
         }
 
         public static string GetName(this EStatTrackAttributeId id)
@@ -17,7 +17,7 @@ namespace acidphantasm_stattrack.Utils
             switch (id)
             {
                 case EStatTrackAttributeId.Kills:
-                    return "KILLS";
+                    return "KILLS | K/D RATIO";
                 case EStatTrackAttributeId.Headshots:
                     return "HEADSHOT KILL %";
                 case EStatTrackAttributeId.ShotsPerKillAverage:
